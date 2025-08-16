@@ -43,9 +43,9 @@ void Start_Teams(Player* team, int qtd_players, int team_id)
         fgets(team[i].name, sizeof(team[i].name), stdin); // Player Name
         team[i].name[strcspn(team[i].name, "\n")] = '\0';
 
-        team[i].defense = rand()%11 + 1;
+        team[i].defense = rand()%10 + 1;
 
-        team[i].attack = rand()%11 + 1;
+        team[i].attack = rand()%10 + 1;
 
         team[i].life = 100;
 
@@ -64,52 +64,78 @@ int Set_Teams(int* time_team)
 }
 
 
-void Game_Scene(Player* attacking_team, Player* defensing_team, int qtd_players, int attack_team_id)
+void Game_Scene(Player* attacking_team, Player* defensing_team, int qtd_players, int attack_team_id, int player_attack_id)
 {
-    for (int i = 0; i < qtd_players; i++)
+    printf("\033[1;33m===================================\033[m\n");
+    
+    if (attack_team_id == 1)
+    {
+        printf("TEAM: \033[1;31mRED\033[m\n");
+    }
+    else if (attack_team_id == 2)
+    {
+        printf("TEAM: \033[1;36mBLUE\033[m\n");
+    }
+
+    printf("WAR NAME: %s\n", attacking_team[player_attack_id].name);
+
+    printf("DEFENSE: %.2f\n", attacking_team[player_attack_id].defense);
+
+    printf("ATTACK: %.2f\n", attacking_team[player_attack_id].attack);
+    
+    printf("LIFE: %.2f\n", attacking_team[player_attack_id].life);
+
+    printf("\033[1;33m===================================\033[m\n\n");
+
+    for (int c = 0; c < qtd_players; c++)
     {
         printf("\033[1;33m===================================\033[m\n");
-        
+
         if (attack_team_id == 1)
-        {
-            printf("TEAM: \033[1;31mRED\033[m\n");
-        }
-        else if (attack_team_id == 2)
         {
             printf("TEAM: \033[1;36mBLUE\033[m\n");
         }
-
-        printf("WAR NAME: %s\n", attacking_team[i].name);
-
-        printf("DEFENSE: %.2f\n", attacking_team[i].defense);
-
-        printf("ATTACK: %.2f\n", attacking_team[i].attack);
-        
-        printf("LIFE: %.2f\n", attacking_team[i].life);
-
-        printf("\033[1;33m===================================\033[m\n\n");
-
-        for (int c = 0; c < qtd_players; c++)
+        else if (attack_team_id == 2)
         {
-            printf("\033[1;33m===================================\033[m\n");
-
-            if (attack_team_id == 1)
-            {
-                printf("TEAM: \033[1;36mBLUE\033[m\n");
-            }
-            else if (attack_team_id == 2)
-            {
-                printf("TEAM: \033[1;31mRED\033[m\n");
-            }
-
-            printf("WAR NAME: %s\n", defensing_team[c].name);
-
-            printf("LIFE: %.2f\n", attacking_team[c].life);
-         
-            printf("\033[1;33m===================================\033[m\n");
+            printf("TEAM: \033[1;31mRED\033[m\n");
         }
+
+        printf("PLAYER ID: %i\n", defensing_team[c].player_id);
+
+        printf("WAR NAME: %s\n", defensing_team[c].name);
+
+        printf("LIFE: %.2f\n", defensing_team[c].life);
+        
+        printf("\033[1;33m===================================\033[m\n");
     }
 
+    printf("\n\n");
+
+}
+
+
+void Attack_Move(Player* attacking_team, Player* defensing_team, int player_attack_id, int player_defend_id)
+{
+    attacking_team[player_attack_id].accuracy = (1 - (attacking_team[player_attack_id].life*attacking_team[player_attack_id].attack)/1000)*100;
+
+    int random_num = rand()%101;
+
+    if (random_num >= attacking_team[player_attack_id].accuracy)
+    {
+        float damage = (attacking_team[player_attack_id].attack/(defensing_team[player_defend_id].defense/10));
+        defensing_team[player_defend_id].life = defensing_team[player_defend_id].life - damage;
+
+
+        printf("\n\n\033[1;33m===================================\033[m\n");
+        printf("\033[1;35m%s acertou um golpe FEROZ em %s e tirou %.2f de vida!!!\033[m\n", attacking_team[player_attack_id].name, defensing_team[player_defend_id].name, damage);
+        printf("\033[1;33m===================================\033[m\n\n");
+    }
+    else
+    {
+        printf("\n\n\033[1;33m===================================\033[m\n");
+        printf("\033[1;35m%s errou o golpe em %s!!!\033[m\n", attacking_team[player_attack_id].name, defensing_team[player_defend_id].name);
+        printf("\033[1;33m===================================\033[m\n\n");
+    }
 }
 
 
@@ -120,6 +146,8 @@ int main()
     // Variables
     int qtd_players = 4;
     int time_team = 0; // time_team = (1 - Red Team / 2 - Blue Team)
+    int choice_id;
+    int i;
 
     // Vectors
     Player red_team[qtd_players];
@@ -132,12 +160,35 @@ int main()
 
     time_team = Set_Teams(&time_team);
 
-    if (time_team == 1)
+    
+    do
     {
-        Game_Scene(red_team, blue_team, qtd_players, 1);
-    }
-    else if (time_team == 2)
-    {
-        Game_Scene(blue_team, red_team, qtd_players, 2);
-    }
+        if (time_team == 1)
+        {
+            for (i = 0; i < qtd_players; i++)
+            {
+                Game_Scene(red_team, blue_team, qtd_players, time_team, i);
+                
+                printf("Enter Player Enemy ID: ");
+                scanf("%i", &choice_id);
+                getchar();
+
+                Attack_Move(red_team, blue_team, i, choice_id);
+            }
+        }
+        else if (time_team == 2)
+        {
+            for (i = 0; i < qtd_players; i++)
+            {
+                Game_Scene(blue_team, red_team, qtd_players, time_team, i);
+
+                printf("Enter Player Enemy ID: ");
+                scanf("%i", &choice_id);
+                getchar();
+
+                Attack_Move(blue_team, red_team, i, choice_id);
+            }
+        }
+    } while (1);
+    
 }
