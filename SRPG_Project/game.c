@@ -123,7 +123,7 @@ void Attack_Move(Player* attacking_team, Player* defensing_team, int player_atta
     if (random_num >= attacking_team[player_attack_id].accuracy)
     {
         float damage = (attacking_team[player_attack_id].attack/(defensing_team[player_defend_id].defense/10));
-        defensing_team[player_defend_id].life = defensing_team[player_defend_id].life - damage;
+        defensing_team[player_defend_id].life -= damage;
 
 
         printf("\n\n\033[1;33m===================================\033[m\n");
